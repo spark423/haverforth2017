@@ -23,6 +23,49 @@ var words = {"+": plus, "-": minus, "*": multiply, "/": divide, "dup": dup, "dro
  //  Similar to how I employed class specific methods to class instance objects in C++, I employed many object specific methods for arrays such as .pop()
  // and .includes(). I was able to implement the concept of closures in my JS project when I nested anonymous functions in the click methods for 
  // html components like the reset button. 
+class Stack {
+  constructor() {
+    this.stack = [];
+    this.size = 0;
+  }
+  // Getter
+  // Method
+  push(newTop) {
+    this.stack.push(newTop);
+    this.size += 1;
+  }
+
+  pop() {
+  	this.stack.pop();
+  	this.size -= 1;
+  }
+
+}
+
+class observableStack extends Stack {
+	constructor() {
+		super();
+		this.handlers = [];
+	}
+
+	register(observer) {
+		this.handlers.push(observer)
+	}
+
+	push(newTop) {
+    this.stack.push(newTop);
+    this.size += 1;
+    this.handlers.forEach(function(observer){observer()})
+	}
+
+	pop() {
+  	var oldTop = this.stack.pop();
+  	this.size -= 1;
+    this.handlers.forEach(function(observer){observer()})
+    return oldTop 
+	}
+}
+
 
 function template(stack, procedures, terminal) {
     for (var i=0; i<procedures.length; i++) {
@@ -120,7 +163,7 @@ function rot(stack,terminal) {
 
 function leftInequality(stack, terminal) {
     if (stack.length < 2) {
-
+        print(terminal, "Not enough elements on the stack!");
     } else {
         var top = stack.pop()
         var secondTop = stack.pop()
@@ -134,7 +177,7 @@ function leftInequality(stack, terminal) {
 
 function rightInequality(stack, terminal) {
     if (stack.length < 2) {
-
+      print(terminal, "Not enough elements on the stack!");
     } else {
         var top = stack.pop()
         var secondTop = stack.pop()
@@ -149,7 +192,7 @@ function rightInequality(stack, terminal) {
 
 function equal(stack, terminal) {
     if (stack.length < 2) {
-
+      print(terminal, "Not enough elements on the stack!");
     } else {
         var top = stack.pop()
         var secondTop = stack.pop()
@@ -173,11 +216,9 @@ function tuck(stack,terminal) {
 
 
 function emptyStack(stack) {
-    while (stack.length > 0) {
+    while (stack.size > 0) {
         stack.pop();
     }
-    $("#thestack").empty();    
-    $("#thestack").append("<tr><td>empty</td></tr>")
 }
 
 /**
@@ -197,9 +238,9 @@ function print(terminal, msg) {
  * @param {Array[Number]} The stack to render
  */
 function renderStack(stack) {
-    if (stack.length > 0) {
+    if (stack.size > 0) {
         $("#thestack").empty();
-        stack.slice().reverse().forEach(function(element) {
+        stack.stack.slice().reverse().forEach(function(element) {
             $("#thestack").append("<tr><td>" + element + "</td></tr>");
         });
     } else {
@@ -226,7 +267,6 @@ function process(stack, input, terminal) {
     } else {
         print(terminal, ":-( Unrecognized input");
     }
-    renderStack(stack);
 };
 
 function runRepl(terminal, stack) {
@@ -285,7 +325,9 @@ $(document).ready(function() {
     // represents the terminal to the end of it.
     $("#terminal").append(terminal.html);
 
-    var stack = [];
+    var stack = new observableStack();
+    var observeChange = function() {renderStack(stack)};
+    stack.register(observeChange);
     var reset = $("reset")
     $("#reset").click(function(){emptyStack(stack)});     
 
