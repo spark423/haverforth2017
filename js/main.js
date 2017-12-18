@@ -1,6 +1,8 @@
 // See the following on using objects as key/value dictionaries
 // https://stackoverflow.com/questions/1208222/how-to-do-associative-array-hashing-in-javascript
-var words = {"+": plus, "-": minus, "*": multiply, "/": divide, "dup": dup, "drop": drop, "swap": swap, "over": over, "rot": rot, "nip": nip, "tuck": tuck, ">": leftInequality, "<": rightInequality, "=": equal};
+var words = {"circle": circle, "triangle": triangle, "+": plus, "-": minus, "*": multiply, "/": divide, "dup": dup, "drop": drop, "swap": swap, "over": over, "rot": rot, "nip": nip, "tuck": tuck, ">": leftInequality, "<": rightInequality, "=": equal};
+var shapes = ["circle", "triangle"]
+
 /** 
  * Your thoughtful comment here.
  */
@@ -66,11 +68,116 @@ class observableStack extends Stack {
 	}
 }
 
+function validif(array) {
+	var ifcounter = 0;
+	var elsecounter = 0;
+	var endifcounter = 0;
+	for (var i=0; i<array.length; i++) {
+		if (array[i] === "if") {
+			ifcounter += 1;
+		}
+		if (array[i] === "else") {
+			elsecounter += 1;
+		}
+		if (array[i] === "endif") {
+			endifcounter += 1;
+		}
+	}
+	return ifcounter > 0 && elsecounter > 0 && endifcounter > 0 && ifcounter === elsecounter && elsecounter === endifcounter;
+}
+
+function elsematcher(array) {
+	var i = 0
+	var ifcounter = 0
+	var elsecounter = 0
+	while (!(ifcounter > 0 && elsecounter >0 && ifcounter === elsecounter)) {
+		if (array[i] === "if") {
+			ifcounter += 1
+		}
+		if (array[i] === "else") {
+			elsecounter += 1
+		}
+		i += 1
+	}
+	return i-1;
+}
+
+function endifmatcher(array) {
+	var i = 0
+	var ifcounter = 0
+	var endifcounter = 0
+	while (!(ifcounter > 0 && endifcounter > 0 && ifcounter === endifcounter)) {
+		if (array[i] === "if") {
+			ifcounter += 1
+		}
+		if (array[i] === "endif") {
+			endifcounter += 1
+		}
+		i += 1
+	}
+	return i-1;
+}
+
+
+function iftemplate(stack, procedures, terminal) {
+	var ifindex = procedures.indexOf("if");
+	var elseindex = elsematcher(procedures);
+	var endifindex = endifmatcher(procedures);
+	var conditions = procedures.slice(0,ifindex);
+	var ifstatement = procedures.slice(ifindex+1,elseindex);
+	var elsestatement = procedures.slice(elseindex+1,endifindex);
+	var postif = procedures.slice(endifindex+1);
+	template(stack, conditions, terminal);
+	var condition = stack.pop();
+	if (condition === -1) {
+		template(stack, ifstatement, terminal);
+	} else {
+		template(stack, elsestatement, terminal);
+	}
+	template(stack, postif, terminal);
+}
 
 function template(stack, procedures, terminal) {
+	if (procedures.includes("if")) {
+		iftemplate(stack, procedures, terminal)
+	} else {
     for (var i=0; i<procedures.length; i++) {
-        process(stack, procedures[i], terminal)
+      process(stack, procedures[i], terminal)
     }
+	}
+}
+
+function circle(stack, terminal, ctx) {
+	if (stack.length < 3) {
+		print(terminal, "Not enough elements on the stack!");
+	} else {
+		console.log("here@@")
+    var first = stack.pop();
+    var second = stack.pop();
+    var third = stack.pop();
+    ctx.beginPath();
+    ctx.arc(second, third, first, 0, 2* Math.PI);
+    ctx.stroke();
+  }	
+}
+
+function triangle(stack, terminal, ctx) {
+	if (stack.length < 6) {
+		print(terminal, "Not enough elements on the stack!");
+	} else {
+    var first = stack.pop();
+    var second = stack.pop();
+    var third = stack.pop();
+    var fourth = stack.pop();
+    var fifth = stack.pop();
+    var sixth = stack.pop();		
+		ctx.beginPath()
+		ctx.moveTo(first, second);
+		ctx.lineTo(third, fourth);
+		ctx.lineTo(fifth, sixth);
+		ctx.closePath();
+		ctx.stroke();  
+	}
 }
 
 function plus(stack, terminal) {
@@ -117,7 +224,7 @@ function dup(stack, terminal) {
     if (stack.length < 1) {
         print(terminal, "Not enough elements on the stack!")
     } else {
-        stack.push(stack[stack.length - 1])
+        stack.push(stack.stack[stack.stack.length - 1])
     }
 }
 
@@ -167,7 +274,7 @@ function leftInequality(stack, terminal) {
     } else {
         var top = stack.pop()
         var secondTop = stack.pop()
-        if (secondtop > top) {
+        if (secondTop > top) {
             stack.push(-1)
         } else {
             stack.push(0)
@@ -181,7 +288,7 @@ function rightInequality(stack, terminal) {
     } else {
         var top = stack.pop()
         var secondTop = stack.pop()
-        if (secondtop < top) {
+        if (secondTop < top) {
             stack.push(-1)
         } else {
             stack.push(0)
@@ -195,8 +302,10 @@ function equal(stack, terminal) {
       print(terminal, "Not enough elements on the stack!");
     } else {
         var top = stack.pop()
+        console.log("top", top)
         var secondTop = stack.pop()
-        if (secondtop === top) {
+        console.log("secondtop", secondTop)
+        if (secondTop === top) {
             stack.push(-1)
         } else {
             stack.push(0)
@@ -256,11 +365,14 @@ function renderStack(stack) {
  * @param {string} input - The string the user typed
  * @param {Terminal} terminal - The terminal object
  */
-function process(stack, input, terminal) {
+function process(stack, input, terminal, ctx) {
     // The user typed a number
     if (!(isNaN(Number(input)))) {
         print(terminal,"pushing " + Number(input));
         stack.push(Number(input));
+    } else if (shapes.includes(input)) {
+      print(terminal,"performing " + input);   	
+      words[input](stack,terminal,ctx);
     } else if (Object.keys(words).includes(input)) {
          print(terminal,"performing " + input);   	
         words[input](stack,terminal)
@@ -269,7 +381,7 @@ function process(stack, input, terminal) {
     }
 };
 
-function runRepl(terminal, stack) {
+function runRepl(terminal, ctx, stack) {
     terminal.input("Type a forth command:", function(line) {
     	if (line.length === 0) {
     		runRepl(terminal, stack);
@@ -283,19 +395,31 @@ function runRepl(terminal, stack) {
                 j = i
                 while (inputs[j] != ";" && j < inputs.length) {
                     if (j === inputs.length - 1) {
-                        print(terminal, "Must finish function definition with ;!");
-                        while (functionInputs.length > 0) {
-                            functionInputs.pop()
-                        }
+                        functionInputs = []
                         j += 1
+                    } else if (inputs[j] === "if") {
+                    	var iffunctionInputs = []
+                    	k = j
+                    	while (!validif(iffunctionInputs) && k < inputs.length) {
+                    		if (k === inputs.length - 1) {
+                    			functionInputs = []
+                    			iffunctionInputs = []
+                          k += 1
+                    		} else {
+                    			iffunctionInputs.push(inputs[k])
+                    			k += 1
+                    		}
+                    	}
+                    	functionInputs = functionInputs.concat(iffunctionInputs);
+                    	j = k + 1
                     } else {
                         functionInputs.push(inputs[j])
                         j += 1
                     }
-                } 
+                }
                 if (functionInputs.length>1) {
                     functionInputs = functionInputs.slice(1)
-                    words[functionInputs[0]] = function(astack,terminal) {template(astack, functionInputs.slice(1), terminal)}
+                    words[functionInputs[0]] = function(astack,terminal) {template(astack, functionInputs.slice(1), terminal)};
                     print (terminal, "User defined new function " + functionInputs[0] + "!")
                     $("#user-defined-funcs").append('<a class="btn btn-success" href="#" role="button" id="' + functionInputs[0] + '">' + functionInputs[0] + '</a>');
                     $("#"+functionInputs[0]).click(function() {process(stack, functionInputs[0], terminal)})
@@ -305,11 +429,11 @@ function runRepl(terminal, stack) {
                     i = j
                 }
             } else {
-                process(stack, inputs[i], terminal)
+                process(stack, inputs[i], terminal, ctx)
                 i += 1
             }
         }   
-        runRepl(terminal, stack);
+        runRepl(terminal, ctx, stack);
       }
     });       
 };
@@ -328,11 +452,14 @@ $(document).ready(function() {
     var stack = new observableStack();
     var observeChange = function() {renderStack(stack)};
     stack.register(observeChange);
-    var reset = $("reset")
-    $("#reset").click(function(){emptyStack(stack)});     
+    var reset = $("#reset")
+    reset.click(function(){emptyStack(stack)});     
+    var canvas = $('canvas');
+    canvas.css("border", "1px solid black")
+    var ctx = canvas[0].getContext('2d');
 
     print(terminal, "Welcome to HaverForth! v0.1");
     print(terminal, "As you type, the stack (on the right) will be kept in sync");
 
-    runRepl(terminal, stack);
+    runRepl(terminal, ctx, stack);
 });
