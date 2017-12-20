@@ -151,6 +151,7 @@ function circle(stack, terminal, ctx) {
 	if (stack.length < 3) {
 		print(terminal, "Not enough elements on the stack!");
 	} else {
+		console.log("here")
     var first = stack.pop();
     var second = stack.pop();
     var third = stack.pop();
@@ -158,6 +159,7 @@ function circle(stack, terminal, ctx) {
     ctx.beginPath();
     ctx.arc(second, third, first, 0, 2* Math.PI);
     ctx.fill();
+    ctx.stroke();
   }	
 }
 
@@ -357,9 +359,7 @@ function equal(stack, terminal) {
       print(terminal, "Not enough elements on the stack!");
     } else {
         var top = stack.pop()
-        console.log("top", top)
         var secondTop = stack.pop()
-        console.log("secondtop", secondTop)
         if (secondTop === top) {
             stack.push(-1)
         } else {
@@ -421,6 +421,7 @@ function renderStack(stack) {
  * @param {Terminal} terminal - The terminal object
  */
 function process(stack, input, terminal, ctx) {
+	console.log("input", input)
     // The user typed a number
     if (!(isNaN(Number(input)))) {
         print(terminal,"pushing " + Number(input));
