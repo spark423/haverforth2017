@@ -1,7 +1,7 @@
 // See the following on using objects as key/value dictionaries
 // https://stackoverflow.com/questions/1208222/how-to-do-associative-array-hashing-in-javascript
-var words = {"circle": circle, "triangle": triangle, "+": plus, "-": minus, "*": multiply, "/": divide, "dup": dup, "drop": drop, "swap": swap, "over": over, "rot": rot, "nip": nip, "tuck": tuck, ">": leftInequality, "<": rightInequality, "=": equal};
-var shapes = ["circle", "triangle"]
+var words = {"circle": circle, "redcircle": redcircle, "line": line, "triangle": triangle, "rectangle": rectangle, "+": plus, "-": minus, "*": multiply, "/": divide, "dup": dup, "drop": drop, "swap": swap, "over": over, "rot": rot, "nip": nip, "tuck": tuck, ">": leftInequality, "<": rightInequality, "=": equal};
+var shapes = ["circle", "triangle", "rectangle", "redcircle", "line"]
 
 /** 
  * Your thoughtful comment here.
@@ -119,7 +119,7 @@ function endifmatcher(array) {
 }
 
 
-function iftemplate(stack, procedures, terminal) {
+function iftemplate(stack, procedures, terminal, ctx) {
 	var ifindex = procedures.indexOf("if");
 	var elseindex = elsematcher(procedures);
 	var endifindex = endifmatcher(procedures);
@@ -127,22 +127,22 @@ function iftemplate(stack, procedures, terminal) {
 	var ifstatement = procedures.slice(ifindex+1,elseindex);
 	var elsestatement = procedures.slice(elseindex+1,endifindex);
 	var postif = procedures.slice(endifindex+1);
-	template(stack, conditions, terminal);
+	template(stack, conditions, terminal, ctx);
 	var condition = stack.pop();
 	if (condition === -1) {
-		template(stack, ifstatement, terminal);
+		template(stack, ifstatement, terminal, ctx);
 	} else {
-		template(stack, elsestatement, terminal);
+		template(stack, elsestatement, terminal, ctx);
 	}
-	template(stack, postif, terminal);
+	template(stack, postif, terminal, ctx);
 }
 
-function template(stack, procedures, terminal) {
+function template(stack, procedures, terminal, ctx) {
 	if (procedures.includes("if")) {
-		iftemplate(stack, procedures, terminal)
+		iftemplate(stack, procedures, terminal, ctx)
 	} else {
     for (var i=0; i<procedures.length; i++) {
-      process(stack, procedures[i], terminal)
+      process(stack, procedures[i], terminal, ctx)
     }
 	}
 }
@@ -151,13 +151,28 @@ function circle(stack, terminal, ctx) {
 	if (stack.length < 3) {
 		print(terminal, "Not enough elements on the stack!");
 	} else {
-		console.log("here@@")
     var first = stack.pop();
     var second = stack.pop();
     var third = stack.pop();
+    ctx.fillStyle = 'white';    
     ctx.beginPath();
     ctx.arc(second, third, first, 0, 2* Math.PI);
-    ctx.stroke();
+    ctx.fill();
+  }	
+}
+
+
+function redcircle(stack, terminal, ctx) {
+	if (stack.length < 3) {
+		print(terminal, "Not enough elements on the stack!");
+	} else {
+    var first = stack.pop();
+    var second = stack.pop();
+    var third = stack.pop();
+    ctx.fillStyle = 'red';
+    ctx.beginPath();
+    ctx.arc(second, third, first, 0, 2* Math.PI);
+    ctx.fill();
   }	
 }
 
@@ -178,6 +193,44 @@ function triangle(stack, terminal, ctx) {
 		ctx.closePath();
 		ctx.stroke();  
 	}
+}
+
+function rectangle(stack,terminal,ctx) {
+	if (stack.length < 8) {
+		print(terminal, "Not enough elements on the stack!");
+	} else {
+    var first = stack.pop();
+    var second = stack.pop();
+    var third = stack.pop();
+    var fourth = stack.pop();
+    var fifth = stack.pop();
+    var sixth = stack.pop();
+    var seventh = stack.pop();
+    var eighth = stack.pop();
+		ctx.beginPath()
+		ctx.moveTo(first, second);
+		ctx.lineTo(third, fourth);
+		ctx.lineTo(fifth, sixth);
+		ctx.lineTo(seventh, eighth);		
+		ctx.closePath();
+		ctx.stroke();  
+	}	
+}
+
+function line(stack, terminal, ctx) {
+	if (stack.length < 4) {
+		print(terminal, "Not enough elements on the stack!");
+	} else {
+    var first = stack.pop();
+    var second = stack.pop();
+    var third = stack.pop();
+    var fourth = stack.pop();
+		ctx.beginPath()
+		ctx.moveTo(first, second);
+		ctx.lineTo(third, fourth);
+		ctx.closePath();
+		ctx.stroke();  
+	}	
 }
 
 function plus(stack, terminal) {
@@ -222,9 +275,11 @@ function divide(stack, terminal) {
 
 function dup(stack, terminal) {
     if (stack.length < 1) {
-        print(terminal, "Not enough elements on the stack!")
+      print(terminal, "Not enough elements on the stack!")
     } else {
-        stack.push(stack.stack[stack.stack.length - 1])
+    	var top = stack.pop();
+      stack.push(top);
+      stack.push(top);
     }
 }
 
@@ -411,7 +466,7 @@ function runRepl(terminal, ctx, stack) {
                     		}
                     	}
                     	functionInputs = functionInputs.concat(iffunctionInputs);
-                    	j = k + 1
+                    	j = k
                     } else {
                         functionInputs.push(inputs[j])
                         j += 1
@@ -419,10 +474,10 @@ function runRepl(terminal, ctx, stack) {
                 }
                 if (functionInputs.length>1) {
                     functionInputs = functionInputs.slice(1)
-                    words[functionInputs[0]] = function(astack,terminal) {template(astack, functionInputs.slice(1), terminal)};
+                    words[functionInputs[0]] = function(astack,terminal) {template(astack, functionInputs.slice(1), terminal, ctx)};
                     print (terminal, "User defined new function " + functionInputs[0] + "!")
                     $("#user-defined-funcs").append('<a class="btn btn-success" href="#" role="button" id="' + functionInputs[0] + '">' + functionInputs[0] + '</a>');
-                    $("#"+functionInputs[0]).click(function() {process(stack, functionInputs[0], terminal)})
+                    $("#"+functionInputs[0]).click(function() {process(stack, functionInputs[0], terminal, ctx)})
                     i = j + 1  
                 } else {
                     print (terminal, "Exiting function definition due to incorrect syntax")
