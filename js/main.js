@@ -38,8 +38,9 @@ class Stack {
   }
 
   pop() {
-  	this.stack.pop();
+  	var oldTop = this.stack.pop();
   	this.size -= 1;
+    return oldTop 
   }
 
 }
