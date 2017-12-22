@@ -149,10 +149,9 @@ function template(stack, procedures, terminal, ctx) {
 }
 
 function circle(stack, terminal, ctx) {
-	if (stack.length < 3) {
+	if (stack.size < 3) {
 		print(terminal, "Not enough elements on the stack!");
 	} else {
-		console.log("here")
     var first = stack.pop();
     var second = stack.pop();
     var third = stack.pop();
@@ -166,7 +165,7 @@ function circle(stack, terminal, ctx) {
 
 
 function redcircle(stack, terminal, ctx) {
-	if (stack.length < 3) {
+	if (stack.size < 3) {
 		print(terminal, "Not enough elements on the stack!");
 	} else {
     var first = stack.pop();
@@ -180,7 +179,7 @@ function redcircle(stack, terminal, ctx) {
 }
 
 function triangle(stack, terminal, ctx) {
-	if (stack.length < 6) {
+	if (stack.size < 6) {
 		print(terminal, "Not enough elements on the stack!");
 	} else {
     var first = stack.pop();
@@ -199,7 +198,7 @@ function triangle(stack, terminal, ctx) {
 }
 
 function rectangle(stack,terminal,ctx) {
-	if (stack.length < 8) {
+	if (stack.size < 8) {
 		print(terminal, "Not enough elements on the stack!");
 	} else {
     var first = stack.pop();
@@ -221,7 +220,7 @@ function rectangle(stack,terminal,ctx) {
 }
 
 function line(stack, terminal, ctx) {
-	if (stack.length < 4) {
+	if (stack.size < 4) {
 		print(terminal, "Not enough elements on the stack!");
 	} else {
     var first = stack.pop();
@@ -237,7 +236,7 @@ function line(stack, terminal, ctx) {
 }
 
 function plus(stack, terminal) {
-	if (stack.length < 2) {
+	if (stack.size < 2) {
 		print(terminal, "Not enough elements on the stack!");
 	} else {
     var first = stack.pop();
@@ -247,7 +246,7 @@ function plus(stack, terminal) {
 }
 
 function minus(stack, terminal) {
-  if (stack.length < 2) {
+  if (stack.size < 2) {
     print(terminal, "Not enough elements on the stack!");
   } else {
     var first = stack.pop();
@@ -257,7 +256,7 @@ function minus(stack, terminal) {
 }
 
 function multiply(stack, terminal) {
-	if (stack.length < 2) {
+	if (stack.size < 2) {
     print(terminal, "Not enough elements on the stack!");
   } else {
     var first = stack.pop();
@@ -267,7 +266,7 @@ function multiply(stack, terminal) {
 }
 
 function divide(stack, terminal) {
-	if (stack.length < 2) {
+	if (stack.size < 2) {
     print(terminal, "Not enough elements on the stack!");
   } else {
     var first = stack.pop();
@@ -277,7 +276,7 @@ function divide(stack, terminal) {
 }
 
 function dup(stack, terminal) {
-    if (stack.length < 1) {
+    if (stack.size < 1) {
       print(terminal, "Not enough elements on the stack!")
     } else {
     	var top = stack.pop();
@@ -287,7 +286,7 @@ function dup(stack, terminal) {
 }
 
 function drop(stack, terminal) {
-    if (stack.length < 1) {
+    if (stack.size < 1) {
         print(terminal, "Not enough elements on the stack!");
     } else {
         stack.pop()
@@ -295,7 +294,7 @@ function drop(stack, terminal) {
 }
 
 function swap(stack, terminal) {
-    if (stack.length < 2) {
+    if (stack.size < 2) {
         print(terminal, "Not enough elements on the stack!");
     } else {
         var oldtop = stack.pop()
@@ -306,15 +305,15 @@ function swap(stack, terminal) {
 }
 
 function over(stack, terminal) {
-    if (stack.length < 2) {
+    if (stack.size < 2) {
         print(terminal, "Not enough elements on the stack!");
     } else {
-        stack.push(stack[stack.length-2])
+        stack.push(stack.stack[stack.size-2])
     }    
 }
 
 function rot(stack,terminal) {
-    if (stack.length < 3) {
+    if (stack.size < 3) {
         print(terminal, "Not enough elements on the stack!");
     } else {
         var oldtop = stack.pop()
@@ -327,7 +326,7 @@ function rot(stack,terminal) {
 }
 
 function leftInequality(stack, terminal) {
-    if (stack.length < 2) {
+    if (stack.size < 2) {
         print(terminal, "Not enough elements on the stack!");
     } else {
         var top = stack.pop()
@@ -341,7 +340,7 @@ function leftInequality(stack, terminal) {
 }
 
 function rightInequality(stack, terminal) {
-    if (stack.length < 2) {
+    if (stack.size < 2) {
       print(terminal, "Not enough elements on the stack!");
     } else {
         var top = stack.pop()
@@ -356,7 +355,7 @@ function rightInequality(stack, terminal) {
 
 
 function equal(stack, terminal) {
-    if (stack.length < 2) {
+    if (stack.size < 2) {
       print(terminal, "Not enough elements on the stack!");
     } else {
         var top = stack.pop()
@@ -370,13 +369,21 @@ function equal(stack, terminal) {
 }
 
 function nip(stack, terminal) {
-    swap(stack, terminal)
-    drop(stack, terminal)
+    if (stack.size < 2) {
+      print(terminal, "Not enough elements on the stack!");
+    } else {
+    	swap(stack, terminal)
+    	drop(stack, terminal)
+    }	
 }
 
 function tuck(stack,terminal) {
-    swap(stack, terminal)
-    over(stack, terminal)
+    if (stack.size < 2) {
+      print(terminal, "Not enough elements on the stack!");
+    } else {
+    	swap(stack, terminal)
+    	over(stack, terminal)
+    }	
 }
 
 
